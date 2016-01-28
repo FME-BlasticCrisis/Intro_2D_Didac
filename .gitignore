@@ -18,6 +18,9 @@ ExportedObj/
 *.booproj
 *.svd
 
+# Images
+*.jpg
+*.png
 
 # Unity3D generated meta files
 *.pidb.meta
