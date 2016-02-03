@@ -29,8 +29,8 @@ public class PathDefinition : MonoBehaviour {
 		}
 	}
 
-	// Can use OnDrawGizmosSelected() for drawing only when selected
-	public void OnDrawGizmos() {
+	// Can use OnDrawGizmos() for drawing on Editor, then OnDrawGizmosSelected() to view only when selected(or a parent)
+	public void OnDrawGizmosSelected() {
 		if (Points == null || Points.Length < 2)
 			return;
 
