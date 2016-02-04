@@ -54,5 +54,23 @@ public class CharacterController2D : MonoBehaviour {
 
 	}
 
+	private void MoveVertically (ref Vector2 deltaMovement) {
 
+	}
+
+	private void HandleVerticalSlope (ref Vector2 deltaMovement) {
+
+	}
+
+	private void HandleHorizontalSlope (ref Vector2 deltaMovement, float angle, bool IsGoingRight) {
+
+	}
+
+	public void OnTriggerEnter2D (Collider2D other) {
+
+	}
+
+	public void OnTriggerExit2D (Collider2D other) {
+
+	}
 }
