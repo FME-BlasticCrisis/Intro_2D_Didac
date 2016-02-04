@@ -6,19 +6,19 @@ public class ControllerState2D {
 	public bool IsCollidingRight  { get; set;}
 	public bool IsCollidingLeft   { get; set;}
 	public bool IsCollidingAbove  { get; set;}
-	public bool IsColllidingBelow { get; set;}
+	public bool IsCollidingBelow { get; set;}
 	public bool IsMovingDownSlope { get; set;}
 	public bool IsMovingUpSlope   { get; set;}
 	public bool IsGrounded        { get { return IsCollidingBelow;} }
 	public float SlopeAngle       { get; set;}
 
-	public bool HasColllisions { get { return IsCollidingRight || IsCollidingLeft || IsCollidingRight || IsColllidingBelow;} }
+	public bool HasCollisions { get { return IsCollidingRight || IsCollidingLeft || IsCollidingRight || IsCollidingBelow;} }
 
 	public void Reset() {
 		IsMovingUpSlope = 
 		IsMovingDownSlope = 
 		IsCollidingLeft = 
-		IsColllidingBelow = 
+		IsCollidingBelow = 
 		IsCollidingRight = false;
 
 		SlopeAngle = 0;
@@ -29,7 +29,7 @@ public class ControllerState2D {
 			IsCollidingRight, 
 			IsCollidingLeft, 
 			IsCollidingAbove, 
-			IsColllidingBelow, 
+			IsCollidingBelow, 
 			IsMovingDownSlope, 
 			IsMovingUpSlope, 
 			SlopeAngle);
