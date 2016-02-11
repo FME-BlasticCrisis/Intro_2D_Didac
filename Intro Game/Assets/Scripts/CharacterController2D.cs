@@ -16,7 +16,7 @@ public class CharacterController2D : MonoBehaviour {
 	public Vector2 Velocity { get { return _velocity;}}
 	public bool CanJump {get { return false; } }
 	public bool HandleCollisions { get; set;}
-	public ControllerParameters2D Parameters {get { _overrideParameters ?? DefaultParameters;}}
+	public ControllerParameters2D Parameters {get { return _overrideParameters ?? DefaultParameters;}}
 
 	private Vector2 _velocity;
 	private Transform _transform;
@@ -34,7 +34,7 @@ public class CharacterController2D : MonoBehaviour {
 		State = new ControllerState2D ();
 		_transform = transform;
 		_localScale = transform.localScale;
-		_boxCollider = GetComponent<BoxCollider> ();
+		_boxCollider = GetComponent<BoxCollider2D> ();
 
 		var colliderWidth = _boxCollider.size.x * Mathf.Abs (transform.localScale.x) - 2 * SkinWidth;
 		_horizontalDistanceBetweenRays = colliderWidth / (TotalHorizontalRays - 1);
