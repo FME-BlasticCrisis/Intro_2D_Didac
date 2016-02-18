@@ -14,6 +14,7 @@ public class CharacterController2D : MonoBehaviour {
 
 	public ControllerState2D State { get; private set;}
 	public Vector2 Velocity { get { return _velocity;}}
+	public Vector3 PlatformVelocity;
 	public bool CanJump {
 		get {
 			if (Parameters.JumpRestrictions == ControllerParameters2D.JumpBehavior.CanJumpAnywhere)
@@ -36,6 +37,11 @@ public class CharacterController2D : MonoBehaviour {
 	private BoxCollider2D _boxCollider;
 	private ControllerParameters2D _overrideParameters;
 	private float _jumpIn;
+	private GameObject _lastStandingOn;
+
+	private Vector3
+					_activeGlobalPlatformPoint,
+					_activeLocalPlatformPoint;
 
 	private Vector3 _rayCastTopLeft, 
 					_rayCastBottomRight,
@@ -43,6 +49,7 @@ public class CharacterController2D : MonoBehaviour {
 
 	private float _verticalDistanceBetweenRays, 
 				  _horizontalDistanceBetweenRays;
+
 
 	public void Awake() {
 		HandleCollisions = true;
@@ -58,6 +65,8 @@ public class CharacterController2D : MonoBehaviour {
 		_verticalDistanceBetweenRays = colliderHeight / (TotalHorizontalRays - 1);
 	}
 
+
+	// Force Modifiers
 	public void AddForce (Vector2 force) {
 		_velocity += force;
 	}
@@ -74,12 +83,16 @@ public class CharacterController2D : MonoBehaviour {
 		_velocity.y = y;
 	}
 
+
+	// Jump
 	public void Jump() {
 		// TODO: Moving platform support
 		AddForce(new Vector2(0, Parameters.JumpMagnitude));
 		_jumpIn = Parameters.JumpFrequency;
 	}
 
+
+	// Late Update(Gravity)
 	public void LateUpdate() {
 		_jumpIn -= Time.deltaTime;
 
@@ -87,6 +100,8 @@ public class CharacterController2D : MonoBehaviour {
 		Move(Velocity * Time.deltaTime);
 	}
 
+
+	// Move method
 	private void Move(Vector2 deltaMovement) {
 		var wasGrounded = State.IsCollidingBelow;
 		State.Reset ();
@@ -108,8 +123,6 @@ public class CharacterController2D : MonoBehaviour {
 
 		_transform.Translate (deltaMovement, Space.World);
 
-		// TODO: Additional moving platform code
-
 		if (Time.deltaTime > 0)
 			_velocity = deltaMovement / Time.deltaTime;
 
@@ -118,12 +131,53 @@ public class CharacterController2D : MonoBehaviour {
 
 		if (State.IsMovingUpSlope)
 			_velocity.y = 0;
+
+		if (StandingOn != null) {
+			_activeGlobalPlatformPoint = transform.position;
+			_activeLocalPlatformPoint = StandingOn.transform.InverseTransformPoint (transform.position);
+
+			// Debug.DrawLine (transform.position, _activeGlobalPlatformPoint);
+			// Debug.DrawLine (transform.position, _activeLocalPlatformPoint);
+
+			if (_lastStandingOn != StandingOn) {
+				if (_lastStandingOn != null)
+					_lastStandingOn.SendMessage ("ControllerExit2D", this, SendMessageOptions.DontRequireReceiver);
+
+				StandingOn.SendMessage ("ControllerEnter2D", this, SendMessageOptions.DontRequireReceiver);
+				_lastStandingOn = StandingOn;
+			} else if (StandingOn != null) {
+				StandingOn.SendMessage ("ControllerStay2D", this, SendMessageOptions.DontRequireReceiver);
+
+				// Fix for bouncing only once in the jumping platform
+				if (wasGrounded)
+					StandingOn.SendMessage ("ControllerEnter2D", this, SendMessageOptions.DontRequireReceiver);
+			}
+		} else if (_lastStandingOn != null) {
+			_lastStandingOn.SendMessage ("ControllerExit2D", this, SendMessageOptions.DontRequireReceiver);
+			_lastStandingOn = null;
+		}
 	}
 
+
+	// Handle Platforms method
 	private void HandlePlatforms () {
+		if (StandingOn != null) {
+			var newGlobalPlatformPoint = StandingOn.transform.TransformPoint (_activeLocalPlatformPoint);
+			var moveDistance = newGlobalPlatformPoint - _activeGlobalPlatformPoint;
 
+			if (moveDistance != Vector3.zero)
+				transform.Translate (moveDistance, Space.World);
+
+			PlatformVelocity = (newGlobalPlatformPoint - _activeGlobalPlatformPoint) / Time.deltaTime;
+		} else {
+			PlatformVelocity = Vector3.zero;
+
+			StandingOn = null;
+		}
 	}
 
+
+	// Calculate Ray Origins method
 	private void CalculateRayOrigins () {
 		var size = new Vector2 (_boxCollider.size.x * Mathf.Abs (_localScale.x), _boxCollider.size.y * Mathf.Abs (_localScale.y)) / 2;
 		var center = new Vector2 (_boxCollider.offset.x * _localScale.x, _boxCollider.offset.y * _localScale.y);
@@ -134,6 +188,8 @@ public class CharacterController2D : MonoBehaviour {
 
 	}
 
+
+	// Move Horizontally method
 	private void MoveHorizontally (ref Vector2 deltaMovement) {
 		var isGoingRight = deltaMovement.x > 0;
 		var rayDistance = Mathf.Abs (deltaMovement.x) + SkinWidth;
@@ -167,6 +223,8 @@ public class CharacterController2D : MonoBehaviour {
 		}
 	}
 
+
+	// Move Vertically method
 	private void MoveVertically (ref Vector2 deltaMovement) {
 		var isGoingUp = deltaMovement.y > 0;
 		var rayDistance = Mathf.Abs (deltaMovement.y) + SkinWidth;
@@ -211,6 +269,8 @@ public class CharacterController2D : MonoBehaviour {
 		}
 	}
 
+
+	// Handle vertical Slope method
 	private void HandleVerticalSlope (ref Vector2 deltaMovement) {
 		var center = (_rayCastBottomLeft.x + _rayCastBottomRight.x) / 2;
 		var direction = -Vector2.up;
@@ -239,6 +299,8 @@ public class CharacterController2D : MonoBehaviour {
 		deltaMovement.y = rayCastHit.point.y - slopeRayVector.y;
 	}
 
+
+	// Handle Horizontal Slope method
 	private bool HandleHorizontalSlope (ref Vector2 deltaMovement, float angle, bool IsGoingRight) {
 		if (Mathf.RoundToInt (angle) == 90)
 			return false;
@@ -261,10 +323,13 @@ public class CharacterController2D : MonoBehaviour {
 		return true;
 	}
 
+
+	// On Trigger Enter 2D method
 	public void OnTriggerEnter2D (Collider2D other) {
 
 	}
 
+	// On Trigger Exit 2D method
 	public void OnTriggerExit2D (Collider2D other) {
 
 	}
