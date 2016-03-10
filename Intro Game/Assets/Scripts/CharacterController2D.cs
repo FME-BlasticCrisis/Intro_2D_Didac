@@ -119,6 +119,9 @@ public class CharacterController2D : MonoBehaviour {
 			}
 
 			MoveVertically (ref deltaMovement);
+
+			CorrectHorizontalPlacement(ref deltaMovement, true);
+			CorrectHorizontalPlacement(ref deltaMovement, false);
 		}
 
 		_transform.Translate (deltaMovement, Space.World);
@@ -169,11 +172,37 @@ public class CharacterController2D : MonoBehaviour {
 				transform.Translate (moveDistance, Space.World);
 
 			PlatformVelocity = (newGlobalPlatformPoint - _activeGlobalPlatformPoint) / Time.deltaTime;
-		} else {
+		} else 
 			PlatformVelocity = Vector3.zero;
 
 			StandingOn = null;
+	}
+		
+	// Handle Collisions with moving platforms
+	private void CorrectHorizontalPlacement(ref Vector2 deltaMovement, bool isRight) {
+		var halfWidth = (_boxCollider.size.x * _localScale.x) / 2f;
+		var rayOrigin = isRight ? _rayCastBottomRight : _rayCastBottomLeft;
+
+		if (isRight)
+			rayOrigin.x -= (halfWidth - SkinWidth);
+		else
+			rayOrigin.x += (halfWidth - SkinWidth);
+
+		var rayDirection = isRight ? Vector2.right : Vector2.left;
+		var offset = 0f;
+
+		for (var i = 1; i < TotalHorizontalRays; i++) {
+			var rayVector = new Vector2(deltaMovement.x + rayOrigin.x, deltaMovement.y + rayOrigin.y + (i * _verticalDistanceBetweenRays));
+			// Debug.DrawRay(rayVector, rayDirection * halfWidth, isRight ? Color.cyan : Color.magenta);
+
+			var raycastHit = Physics2D.Raycast(rayVector, rayDirection, halfWidth, PlatformMask);
+			if (!raycastHit)
+				continue;
+
+			offset = isRight ? ((raycastHit.point.x - _transform.position.x) - halfWidth) : (halfWidth - (_transform.position.x - raycastHit.point.x));
 		}
+
+		deltaMovement.x += offset;
 	}
 
 
@@ -326,11 +355,19 @@ public class CharacterController2D : MonoBehaviour {
 
 	// On Trigger Enter 2D method
 	public void OnTriggerEnter2D (Collider2D other) {
+		var parameters = other.gameObject.GetComponent<ControllerPhysicsVolume2D>();
+		if (parameters == null)
+			return;
 
+		_overrideParameters = parameters.Parameters;
 	}
 
 	// On Trigger Exit 2D method
 	public void OnTriggerExit2D (Collider2D other) {
+		var parameters = other.gameObject.GetComponent<ControllerPhysicsVolume2D>();
+		if (parameters == null)
+			return;
 
+		_overrideParameters = null;
 	}
 }
