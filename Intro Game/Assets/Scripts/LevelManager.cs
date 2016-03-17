@@ -41,6 +41,17 @@ public class LevelManager : MonoBehaviour {
 
 		_started = DateTime.UtcNow;
 
+		var listeners = FindObjectsOfType<MonoBehaviour> ().OfType<IPlayerRespawnListener> ();
+		foreach (var listener in listeners) {
+			for (var i = _checkpoints.Count - 1; i >= 0; i--) {
+				var distance = ((MonoBehaviour)listener).transform.position.x - _checkpoints [i].transform.position.x;
+				if (distance < 0)
+					continue;
+
+				_checkpoints [i].AssignObjectToCheckpoint (listener);
+			}
+		}
+
 	#if UNITY_EDITOR
 		if (DebugSpawn != null)
 			DebugSpawn.SpawnPlayer (Player);
