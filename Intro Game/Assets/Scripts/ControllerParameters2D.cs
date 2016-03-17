@@ -1,0 +1,26 @@
+﻿using System;
+using UnityEngine;
+using System.Collections;
+
+[System.Serializable]
+public class ControllerParameters2D {
+
+	public enum JumpBehavior {
+		CanJumpGround,
+		CanJumpAnywhere,
+		CantJump
+	}
+
+	public Vector2 MaxVelocity = new Vector2(float.MaxValue, float.MaxValue);
+
+	[Range(0, 90)]
+	public float SlopeLimit = 30;
+
+	public float Gravity = -10f;
+
+	public JumpBehavior JumpRestrictions;
+
+	public float JumpFrequency = .25f;
+
+	public float JumpMagnitude = 12;
+}
