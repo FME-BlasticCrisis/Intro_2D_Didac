@@ -25,6 +25,6 @@ public class GiveDamageToPlayer : MonoBehaviour {
 
 		controller.SetForce (new Vector2 (
 			-1 * Mathf.Sign (totalVelocity.x) * Mathf.Clamp (Mathf.Abs (totalVelocity.x) * 6, 10, 40), 
-			-1 * Mathf.Sign (totalVelocity.x) * Mathf.Clamp (Mathf.Abs (totalVelocity.x) * 5, 0, 15)));
+			-1 * Mathf.Sign (totalVelocity.x) * Mathf.Clamp (Mathf.Abs (totalVelocity.x) * 6, 5, 30)));
 	}
 }
