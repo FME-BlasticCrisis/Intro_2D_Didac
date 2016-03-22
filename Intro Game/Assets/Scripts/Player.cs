@@ -10,12 +10,16 @@ public class Player : MonoBehaviour {
 	public float MaxSpeed = 8;
 	public float SpeedAccelerationOnGround = 10f;
 	public float SpeedAccelerationInAir = 5f;
+	public int maxHealth = 100;
+	public GameObject OuchEffect;
 
+	public int Health { get; private set;}
 	public bool IsDead { get; private set;}
 
 	public void Awake() {
 		_controller = GetComponent<CharacterController2D> ();
 		_isFacingRight = transform.localScale.x > 0;
+		Health = maxHealth;
 	}
 
 	public void Update() {
@@ -34,6 +38,7 @@ public class Player : MonoBehaviour {
 		_controller.HandleCollisions = false;
 		GetComponent<Collider2D>().enabled = false;
 		IsDead = true;
+		Health = 0;
 
 		_controller.SetForce (new Vector2 (0, 15));
 	}
@@ -45,8 +50,18 @@ public class Player : MonoBehaviour {
 		IsDead = false;
 		GetComponent<Collider2D> ().enabled = true;
 		_controller.HandleCollisions = true;
+		Health = maxHealth;
 
 		transform.position = spawnPoint.position;
+	}
+
+	public void TakeDamage(int damage) {
+		FloatingText.Show (string.Format ("-{0}!", damage), "PlayerTakeDamageText", new FromWorldPointTextPositioner (Camera.main, transform.position, 2f, 60f));
+		Instantiate (OuchEffect, transform.position, transform.rotation);
+		Health -= damage;
+
+		if (Health <= 0)
+			LevelManager.Instance.KillPlayer ();
 	}
 
 	private void HandleInput() {
