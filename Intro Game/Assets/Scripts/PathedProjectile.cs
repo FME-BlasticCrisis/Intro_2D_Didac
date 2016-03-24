@@ -20,8 +20,10 @@ public class PathedProjectile : MonoBehaviour {
 		if (distanceSquared > .01f * .01f)
 			return;
 
-		if (DestroyEffect != null)
+		if (DestroyEffect != null) {
+			// Debug.Log ("Calling Effect");
 			Instantiate (DestroyEffect, transform.position, transform.rotation);
+		}
 		
 		Destroy (gameObject);
 	}
