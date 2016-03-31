@@ -7,6 +7,7 @@ public class SimpleEnemyAI : MonoBehaviour, ITakeDamage, IPlayerRespawnListener 
 	public float FireRate = 1;
 	public Projectile Projectile;
 	public GameObject DestroyedEffect;
+	public int PointsToGivePlayer;
 
 	private CharacterController2D _controller;
 	private Vector2 _direction;
@@ -40,7 +41,15 @@ public class SimpleEnemyAI : MonoBehaviour, ITakeDamage, IPlayerRespawnListener 
 	}
 
 	public void TakeDamage(int damage, GameObject instigator) {
-		Instantiate (DestroyedEffect);
+		if (PointsToGivePlayer != 0) {
+			var projectile = instigator.GetComponent<Projectile> ();
+			if (projectile != null && projectile.Owner.GetComponent<Player> () != null) {
+				GameManager.Instance.AddPoints (PointsToGivePlayer);
+				FloatingText.Show (string.Format ("+{0}!", PointsToGivePlayer), "PointStartext", new FromWorldPointTextPositioner (Camera.main, transform.position, 1.5f, 50));
+			}
+		}
+
+		Instantiate (DestroyedEffect, transform.position, transform.rotation);
 		gameObject.SetActive (false);
 	}
 
