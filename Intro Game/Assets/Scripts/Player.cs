@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Player : MonoBehaviour {
+public class Player : MonoBehaviour, ITakeDamage {
 
 	private bool _isFacingRight;
 	private CharacterController2D _controller;
@@ -12,9 +12,15 @@ public class Player : MonoBehaviour {
 	public float SpeedAccelerationInAir = 5f;
 	public int maxHealth = 100;
 	public GameObject OuchEffect;
+	public Projectile Projectile;
+	public float FireRate;
+	public Transform ProjectileFireLocation;
+	public GameObject FireProjectileEffect;
 
 	public int Health { get; private set;}
 	public bool IsDead { get; private set;}
+
+	private float _canFireIn;
 
 	public void Awake() {
 		_controller = GetComponent<CharacterController2D> ();
@@ -23,6 +29,8 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Update() {
+		_canFireIn -= Time.deltaTime;
+
 		if(!IsDead)
 			HandleInput ();
 
@@ -55,7 +63,7 @@ public class Player : MonoBehaviour {
 		transform.position = spawnPoint.position;
 	}
 
-	public void TakeDamage(int damage) {
+	public void TakeDamage(int damage, GameObject instigator) {
 		FloatingText.Show (string.Format ("-{0}!", damage), "PlayerTakeDamageText", new FromWorldPointTextPositioner (Camera.main, transform.position, 2f, 60f));
 		Instantiate (OuchEffect, transform.position, transform.rotation);
 		Health -= damage;
@@ -80,6 +88,26 @@ public class Player : MonoBehaviour {
 		if (_controller.CanJump && Input.GetKey(KeyCode.Space)) {
 			_controller.Jump();
 		}
+
+		if (Input.GetMouseButtonDown (0))
+			FireProjectile ();
+	}
+
+	private void FireProjectile() {
+		if (_canFireIn > 0)
+			return;
+
+		if (FireProjectileEffect != null) {
+			var effect = (GameObject) Instantiate (FireProjectileEffect, ProjectileFireLocation.position, ProjectileFireLocation.rotation);
+			effect.transform.parent = transform;
+		}
+
+		var direction = _isFacingRight ? Vector2.right : -Vector2.right;
+
+		var projectile = (Projectile)Instantiate (Projectile, ProjectileFireLocation.position, ProjectileFireLocation.rotation);
+		projectile.Initialize (gameObject, direction, _controller.Velocity);
+
+		_canFireIn = FireRate;
 	}
 
 	private void Flip() {
