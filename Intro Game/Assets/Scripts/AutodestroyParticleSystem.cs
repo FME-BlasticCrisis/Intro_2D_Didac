@@ -10,9 +10,8 @@ public class AutodestroyParticleSystem : MonoBehaviour {
 	}
 
 	public void Update() {
-		if (_particleSystem.isPlaying)
-			return;
-
-		Destroy (gameObject);
+		if (_particleSystem != null) {
+			Destroy (gameObject, _particleSystem.duration + _particleSystem.startLifetime);
+		}
 	}
 }
