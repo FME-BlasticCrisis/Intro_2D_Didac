@@ -10,7 +10,7 @@ public class Player : MonoBehaviour, ITakeDamage {
 	public float MaxSpeed = 8;
 	public float SpeedAccelerationOnGround = 10f;
 	public float SpeedAccelerationInAir = 5f;
-	public int maxHealth = 100;
+	public int MaxHealth = 100;
 	public GameObject OuchEffect;
 	public Projectile Projectile;
 	public float FireRate;
@@ -25,7 +25,7 @@ public class Player : MonoBehaviour, ITakeDamage {
 	public void Awake() {
 		_controller = GetComponent<CharacterController2D> ();
 		_isFacingRight = transform.localScale.x > 0;
-		Health = maxHealth;
+		Health = MaxHealth;
 	}
 
 	public void Update() {
@@ -58,7 +58,7 @@ public class Player : MonoBehaviour, ITakeDamage {
 		IsDead = false;
 		GetComponent<Collider2D> ().enabled = true;
 		_controller.HandleCollisions = true;
-		Health = maxHealth;
+		Health = MaxHealth;
 
 		transform.position = spawnPoint.position;
 	}
@@ -70,6 +70,11 @@ public class Player : MonoBehaviour, ITakeDamage {
 
 		if (Health <= 0)
 			LevelManager.Instance.KillPlayer ();
+	}
+
+	public void GiveHealth(int health, GameObject instigator) {
+		FloatingText.Show (string.Format ("+{0}!", health), "PlayerGotHealthText", new FromWorldPointTextPositioner (Camera.main, transform.position, 1.5f, 50));
+		Health = Mathf.Min (Health + health, MaxHealth);
 	}
 
 	private void HandleInput() {
