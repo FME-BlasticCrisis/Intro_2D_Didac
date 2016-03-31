@@ -13,8 +13,8 @@ public class SimpleProjectile : Projectile, ITakeDamage {
 			DestroyProjectile ();
 			return;
 		}
-
-		transform.Translate ((Direction + new Vector2 (InitialVelocity.x, 0)) * Speed * Time.deltaTime, Space.World);
+			
+		transform.Translate (Direction * ((Mathf.Abs (InitialVelocity.x) + Speed) * Time.deltaTime), Space.World);
 	}
 
 	public void TakeDamage(int damage, GameObject instigator) {
@@ -29,7 +29,7 @@ public class SimpleProjectile : Projectile, ITakeDamage {
 		DestroyProjectile ();
 	}
 
-	protected override void OnCollideOther (Collider2D other, ITakeDamage takeDamage) {
+	protected override void OnCollideOther (Collider2D other) {
 		DestroyProjectile ();
 	}
 
