@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour {
 
@@ -97,9 +98,9 @@ public class LevelManager : MonoBehaviour {
 		yield return new WaitForSeconds (4f);
 
 		if (string.IsNullOrEmpty (levelName))
-			Application.LoadLevel ("StartScreen");
+			SceneManager.LoadScene ("StartScreen");
 		else
-			Application.LoadLevel (levelName);
+			SceneManager.LoadScene (levelName);
 	}
 
 	public void KillPlayer() {

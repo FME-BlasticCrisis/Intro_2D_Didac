@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class StartScreen : MonoBehaviour {
 
@@ -10,6 +11,6 @@ public class StartScreen : MonoBehaviour {
 			return;
 
 		GameManager.Instance.Reset ();
-		Application.LoadLevel (FirstLevel);
+		SceneManager.LoadScene(FirstLevel);
 	}
 }
