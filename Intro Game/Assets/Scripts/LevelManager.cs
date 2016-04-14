@@ -29,6 +29,7 @@ public class LevelManager : MonoBehaviour {
 	public int BonusSecondMultiplier;
 
 	public void Awake() {
+		_savedPoints = GameManager.Instance.Points;
 		Instance = this;
 	}
 
@@ -79,6 +80,26 @@ public class LevelManager : MonoBehaviour {
 		GameManager.Instance.AddPoints (CurrentTimeBonus);
 		_savedPoints = GameManager.Instance.Points;
 		_started = DateTime.UtcNow;
+	}
+
+	public void GotoNextLevel (string levelName) {
+		StartCoroutine (GotoNextLevelCo (levelName));
+	}
+
+	private IEnumerator GotoNextLevelCo(string levelName) {
+		Player.FinishLevel ();
+		GameManager.Instance.AddPoints (CurrentTimeBonus);
+
+		FloatingText.Show ("Level Complete!", "CheckpointText", new CenteredTextPositioner (.2f));
+		yield return new WaitForSeconds (1);
+
+		FloatingText.Show (string.Format ("{0} points!", GameManager.Instance.Points), "CheckpointText", new CenteredTextPositioner (.1f));
+		yield return new WaitForSeconds (4f);
+
+		if (string.IsNullOrEmpty (levelName))
+			Application.LoadLevel ("StartScreen");
+		else
+			Application.LoadLevel (levelName);
 	}
 
 	public void KillPlayer() {
